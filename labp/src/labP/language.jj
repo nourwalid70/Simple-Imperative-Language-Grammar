@@ -1,0 +1,89 @@
+options {
+STATIC = false ;
+}
+PARSER_BEGIN(language)
+package labP;
+
+
+public class language {
+  
+    public static void main(String[] args) throws ParseException, TokenMgrError, NumberFormatException {
+      
+      language l=new language(System.in);
+      l.Start();
+    }
+}
+
+PARSER_END(language)
+
+
+
+SKIP: { " " |"\t" |"\n" |"\r" }
+
+TOKEN: { <False:"ff"> }
+TOKEN: { <WORD: (["a"-"f"])+ > }
+TOKEN: { <NUMBER: (["0"-"9"])+ >  }
+TOKEN: { <SIGN:"+"|"-"> }
+TOKEN: { <NOT:"!"> }
+TOKEN: { <Equal:"=="> }
+TOKEN: { <assign:":="> }
+TOKEN: { <And:"^"> }
+TOKEN: { <IF:"if"> }
+TOKEN: { <THEN:"then"> }
+TOKEN: { <ELSE:"else"> }
+TOKEN: { <WHILE:"while"> }
+TOKEN: { <Do:"do"> }
+TOKEN: { <SEMI:";"> }
+TOKEN: { <OpenB:"("> }
+TOKEN: { <CloseB:")"> }
+TOKEN: { <Skip:"skip"> }
+
+String Start() throws NumberFormatException :
+{
+}
+{
+Command()
+<EOF>
+{return "accepted";}
+}
+
+
+void AEXP():
+{}
+{
+    <NUMBER>
+    |
+    <WORD>
+    |
+    <OpenB> AEXP() <SIGN> AEXP() <CloseB>
+}
+
+void BEXP():
+{}
+{
+    "tt"
+    |
+    LOOKAHEAD(3)
+    <False>
+    | 
+    <NOT> BEXP()
+   |
+   LOOKAHEAD(4)
+   <OpenB>  AEXP() <Equal> AEXP()  <CloseB>
+ |
+ LOOKAHEAD(4)
+ <OpenB>   BEXP() <And> BEXP() <CloseB>  
+}
+
+void Command():
+{}
+{
+    <Skip>[";"Command()]
+    |
+    <WORD> <assign> AEXP() [";"Command()]
+    |
+    <IF> BEXP() <THEN> Command() <ELSE> Command()[";"Command()]
+    |
+    <WHILE> BEXP() <Do> Command() [";"Command()]
+    
+}
